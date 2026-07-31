@@ -1725,11 +1725,12 @@ body.light #cheat-fn-desc   { color: #1E293B; }
         <div class="cfg-row"><span class="cfg-lbl">Title</span><input id="aled-title" type="text" value="API-Led Architecture" class="cfg-inp"/></div>
         <div class="cfg-row"><span class="cfg-lbl">Biz Group</span><input id="aled-bizgrp" type="text" value="Business Group" class="cfg-inp"/></div>
 
-        <!-- CONSUMERS -->
+        <!-- CONSUMERS (optional) -->
         <div class="cfg-section-hdr" style="margin-top:8px;display:flex;align-items:center;justify-content:space-between">
-          <span>Consumer Apps</span>
+          <span>Consumer Apps <span style="font-weight:400;color:var(--txt3);text-transform:none;letter-spacing:0">(optional)</span></span>
           <button onclick="aledAddConsumer()" style="font-size:9px;padding:2px 7px;border-radius:5px;cursor:pointer;background:rgba(96,165,250,.15);color:#60A5FA;border:1px solid rgba(96,165,250,.35);font-weight:700">+ Add</button>
         </div>
+        <div style="font-size:9px;color:var(--txt3);margin:-2px 0 5px">Remove all consumers to hide this layer from the diagram.</div>
         <div id="aled-consumers-list" style="display:flex;flex-direction:column;gap:5px;margin-bottom:6px"></div>
 
         <!-- BACKENDS -->
@@ -1740,113 +1741,35 @@ body.light #cheat-fn-desc   { color: #1E293B; }
         <div id="aled-backends-list" style="display:flex;flex-direction:column;gap:5px;margin-bottom:6px"></div>
         
 
-        <!-- EAPI LAYER -->
+        <!-- EAPI LAYER (multi-instance) -->
         <div class="cfg-section-hdr" style="margin-top:10px">API Layers</div>
         <div style="background:rgba(56,189,248,.06);border:1px solid rgba(56,189,248,.25);border-radius:10px;padding:9px 11px;margin-bottom:8px">
           <label style="display:flex;align-items:center;gap:7px;cursor:pointer;margin-bottom:7px">
-            <input type="checkbox" id="aled-has-eapi" checked style="accent-color:#38BDF8;width:14px;height:14px">
+            <input type="checkbox" id="aled-has-eapi" checked onchange="genALedDiagram()" style="accent-color:#38BDF8;width:14px;height:14px">
             <span style="font-size:11px;font-weight:800;color:#38BDF8">Experience API (EAPI)</span>
           </label>
-          <div id="aled-eapi-fields" style="display:flex;flex-direction:column;gap:5px">
-            <input type="text" id="aled-eapi-name" value="my-experience-api" placeholder="API name" style="width:100%;box-sizing:border-box;font-size:10px;border-radius:6px;padding:4px 8px;background:var(--input-bg);color:var(--input-txt);border:1px solid rgba(56,189,248,.3)"/>
-            <!-- Auth + Protocol + Port row -->
-            <div style="display:grid;grid-template-columns:1fr 60px 44px;gap:4px">
-              <select id="aled-eapi-auth" style="font-size:9px;border-radius:5px;padding:3px 5px;background:var(--input-bg);color:var(--input-txt);border:1px solid rgba(56,189,248,.3)">
-                <option>Entra Id</option><option>OAuth 2.0</option><option>Client ID Enforcement</option><option>JWT</option><option>API Key</option><option>Basic Auth</option><option>mTLS</option><option>None</option>
-              </select>
-              <select id="aled-eapi-proto" style="font-size:9px;border-radius:5px;padding:3px 4px;background:var(--input-bg);color:var(--input-txt);border:1px solid rgba(56,189,248,.3)">
-                <option>HTTPS</option><option>HTTP</option><option>WSS</option><option>gRPC</option>
-              </select>
-              <input type="text" id="aled-eapi-port" value="443" placeholder="Port" style="font-size:9px;border-radius:5px;padding:3px 4px;background:var(--input-bg);color:var(--input-txt);border:1px solid rgba(56,189,248,.3);text-align:center"/>
-            </div>
-            <!-- New / Enhanced badges -->
-            <div style="display:flex;gap:8px">
-              <label style="display:flex;align-items:center;gap:4px;font-size:9px;cursor:pointer"><input type="checkbox" id="aled-eapi-new" checked style="accent-color:#4CAF50;width:12px;height:12px"> <span style="color:#4CAF50;font-weight:700">New &#9679;</span></label>
-              <label style="display:flex;align-items:center;gap:4px;font-size:9px;cursor:pointer"><input type="checkbox" id="aled-eapi-enh" style="accent-color:#9E9E9E;width:12px;height:12px"> <span style="color:#9E9E9E;font-weight:700">Enhanced &#9679;</span></label>
-            </div>
-            <!-- Per-layer deploy target -->
-            <div style="display:flex;align-items:center;gap:6px;margin-top:2px">
-              <span style="font-size:9px;font-weight:700;color:var(--txt3);flex-shrink:0">Deploy</span>
-              <select id="aled-eapi-deploy" style="flex:1;font-size:9px;border-radius:5px;padding:3px 5px;background:var(--input-bg);color:var(--input-txt);border:1px solid rgba(56,189,248,.3)">
-                <option value="CH 2.0">CloudHub 2.0</option><option value="CH 1.0">CloudHub 1.0</option>
-                <option value="RTF">Runtime Fabric</option><option value="On-Prem">On-Premises</option><option value="Hybrid">Hybrid</option>
-              </select>
-            </div>
-            <!-- HTTP Methods -->
-            <div style="font-size:9px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.04em;margin-top:2px">HTTP Methods &#8212; Client &#8594; EAPI</div>
-            <div id="aled-eapi-ops" style="display:flex;flex-direction:column;gap:3px"></div>
-            <button onclick="addAledOp('eapi')" style="width:100%;padding:4px;font-size:9px;font-weight:700;border-radius:6px;cursor:pointer;background:rgba(56,189,248,.08);color:#38BDF8;border:1px dashed rgba(56,189,248,.4);font-family:var(--ui)">+ Add Operation</button>
-          </div>
+          <div id="aled-eapi-items" style="display:flex;flex-direction:column;gap:8px"></div>
+          <button onclick="aledAddLayerItem('eapi')" style="width:100%;margin-top:7px;padding:5px;font-size:9px;font-weight:700;border-radius:6px;cursor:pointer;background:rgba(56,189,248,.1);color:#38BDF8;border:1px dashed rgba(56,189,248,.45);font-family:var(--ui)">+ Add Experience API</button>
         </div>
 
-        <!-- PAPI LAYER -->
+        <!-- PAPI LAYER (multi-instance) -->
         <div style="background:rgba(163,230,53,.06);border:1px solid rgba(163,230,53,.25);border-radius:10px;padding:9px 11px;margin-bottom:8px">
           <label style="display:flex;align-items:center;gap:7px;cursor:pointer;margin-bottom:7px">
-            <input type="checkbox" id="aled-has-papi" checked style="accent-color:#A3E635;width:14px;height:14px">
+            <input type="checkbox" id="aled-has-papi" checked onchange="genALedDiagram()" style="accent-color:#A3E635;width:14px;height:14px">
             <span style="font-size:11px;font-weight:800;color:#A3E635">Process API (PAPI)</span>
           </label>
-          <div id="aled-papi-fields" style="display:flex;flex-direction:column;gap:5px">
-            <input type="text" id="aled-papi-name" value="my-process-api" placeholder="API name" style="width:100%;box-sizing:border-box;font-size:10px;border-radius:6px;padding:4px 8px;background:var(--input-bg);color:var(--input-txt);border:1px solid rgba(163,230,53,.3)"/>
-            <div style="display:grid;grid-template-columns:1fr 60px 44px;gap:4px">
-              <select id="aled-papi-auth" style="font-size:9px;border-radius:5px;padding:3px 5px;background:var(--input-bg);color:var(--input-txt);border:1px solid rgba(163,230,53,.3)">
-                <option>Client ID Enforcement</option><option>Entra Id</option><option>OAuth 2.0</option><option>JWT</option><option>API Key</option><option>Basic Auth</option><option>mTLS</option><option>None</option>
-              </select>
-              <select id="aled-papi-proto" style="font-size:9px;border-radius:5px;padding:3px 4px;background:var(--input-bg);color:var(--input-txt);border:1px solid rgba(163,230,53,.3)">
-                <option>HTTPS</option><option>HTTP</option><option>WSS</option><option>gRPC</option>
-              </select>
-              <input type="text" id="aled-papi-port" value="443" placeholder="Port" style="font-size:9px;border-radius:5px;padding:3px 4px;background:var(--input-bg);color:var(--input-txt);border:1px solid rgba(163,230,53,.3);text-align:center"/>
-            </div>
-            <div style="display:flex;gap:8px">
-              <label style="display:flex;align-items:center;gap:4px;font-size:9px;cursor:pointer"><input type="checkbox" id="aled-papi-new" checked style="accent-color:#4CAF50;width:12px;height:12px"> <span style="color:#4CAF50;font-weight:700">New &#9679;</span></label>
-              <label style="display:flex;align-items:center;gap:4px;font-size:9px;cursor:pointer"><input type="checkbox" id="aled-papi-enh" style="accent-color:#9E9E9E;width:12px;height:12px"> <span style="color:#9E9E9E;font-weight:700">Enhanced &#9679;</span></label>
-            </div>
-            <!-- Per-layer deploy target -->
-            <div style="display:flex;align-items:center;gap:6px;margin-top:2px">
-              <span style="font-size:9px;font-weight:700;color:var(--txt3);flex-shrink:0">Deploy</span>
-              <select id="aled-papi-deploy" style="flex:1;font-size:9px;border-radius:5px;padding:3px 5px;background:var(--input-bg);color:var(--input-txt);border:1px solid rgba(163,230,53,.3)">
-                <option value="CH 2.0">CloudHub 2.0</option><option value="CH 1.0">CloudHub 1.0</option>
-                <option value="RTF">Runtime Fabric</option><option value="On-Prem">On-Premises</option><option value="Hybrid">Hybrid</option>
-              </select>
-            </div>
-            <div style="font-size:9px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.04em;margin-top:2px">HTTP Methods &#8212; EAPI &#8594; PAPI</div>
-            <div id="aled-papi-ops" style="display:flex;flex-direction:column;gap:3px"></div>
-            <button onclick="addAledOp('papi')" style="width:100%;padding:4px;font-size:9px;font-weight:700;border-radius:6px;cursor:pointer;background:rgba(163,230,53,.08);color:#A3E635;border:1px dashed rgba(163,230,53,.4);font-family:var(--ui)">+ Add Operation</button>
-          </div>
+          <div id="aled-papi-items" style="display:flex;flex-direction:column;gap:8px"></div>
+          <button onclick="aledAddLayerItem('papi')" style="width:100%;margin-top:7px;padding:5px;font-size:9px;font-weight:700;border-radius:6px;cursor:pointer;background:rgba(163,230,53,.1);color:#A3E635;border:1px dashed rgba(163,230,53,.45);font-family:var(--ui)">+ Add Process API</button>
         </div>
 
-        <!-- SAPI LAYER -->
+        <!-- SAPI LAYER (multi-instance) -->
         <div style="background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.25);border-radius:10px;padding:9px 11px;margin-bottom:8px">
           <label style="display:flex;align-items:center;gap:7px;cursor:pointer;margin-bottom:7px">
-            <input type="checkbox" id="aled-has-sapi" checked style="accent-color:#FBBF24;width:14px;height:14px">
+            <input type="checkbox" id="aled-has-sapi" checked onchange="genALedDiagram()" style="accent-color:#FBBF24;width:14px;height:14px">
             <span style="font-size:11px;font-weight:800;color:#FBBF24">System API (SAPI)</span>
           </label>
-          <div id="aled-sapi-fields" style="display:flex;flex-direction:column;gap:5px">
-            <input type="text" id="aled-sapi-name" value="my-system-api" placeholder="API name" style="width:100%;box-sizing:border-box;font-size:10px;border-radius:6px;padding:4px 8px;background:var(--input-bg);color:var(--input-txt);border:1px solid rgba(251,191,36,.3)"/>
-            <div style="display:grid;grid-template-columns:1fr 60px 44px;gap:4px">
-              <select id="aled-sapi-auth" style="font-size:9px;border-radius:5px;padding:3px 5px;background:var(--input-bg);color:var(--input-txt);border:1px solid rgba(251,191,36,.3)">
-                <option>OAuth 2.0</option><option>Entra Id</option><option>Client ID Enforcement</option><option>JWT</option><option>API Key</option><option>Basic Auth</option><option>mTLS</option><option>None</option>
-              </select>
-              <select id="aled-sapi-proto" style="font-size:9px;border-radius:5px;padding:3px 4px;background:var(--input-bg);color:var(--input-txt);border:1px solid rgba(251,191,36,.3)">
-                <option>HTTPS</option><option>HTTP</option><option>WSS</option><option>gRPC</option>
-              </select>
-              <input type="text" id="aled-sapi-port" value="8080" placeholder="Port" style="font-size:9px;border-radius:5px;padding:3px 4px;background:var(--input-bg);color:var(--input-txt);border:1px solid rgba(251,191,36,.3);text-align:center"/>
-            </div>
-            <div style="display:flex;gap:8px">
-              <label style="display:flex;align-items:center;gap:4px;font-size:9px;cursor:pointer"><input type="checkbox" id="aled-sapi-new" checked style="accent-color:#4CAF50;width:12px;height:12px"> <span style="color:#4CAF50;font-weight:700">New &#9679;</span></label>
-              <label style="display:flex;align-items:center;gap:4px;font-size:9px;cursor:pointer"><input type="checkbox" id="aled-sapi-enh" style="accent-color:#9E9E9E;width:12px;height:12px"> <span style="color:#9E9E9E;font-weight:700">Enhanced &#9679;</span></label>
-            </div>
-            <!-- Per-layer deploy target -->
-            <div style="display:flex;align-items:center;gap:6px;margin-top:2px">
-              <span style="font-size:9px;font-weight:700;color:var(--txt3);flex-shrink:0">Deploy</span>
-              <select id="aled-sapi-deploy" style="flex:1;font-size:9px;border-radius:5px;padding:3px 5px;background:var(--input-bg);color:var(--input-txt);border:1px solid rgba(251,191,36,.3)">
-                <option value="CH 2.0">CloudHub 2.0</option><option value="CH 1.0">CloudHub 1.0</option>
-                <option value="RTF">Runtime Fabric</option><option value="On-Prem">On-Premises</option><option value="Hybrid">Hybrid</option>
-              </select>
-            </div>
-            <div style="font-size:9px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.04em;margin-top:2px">HTTP Methods &#8212; PAPI &#8594; SAPI</div>
-            <div id="aled-sapi-ops" style="display:flex;flex-direction:column;gap:3px"></div>
-            <button onclick="addAledOp('sapi')" style="width:100%;padding:4px;font-size:9px;font-weight:700;border-radius:6px;cursor:pointer;background:rgba(251,191,36,.08);color:#FBBF24;border:1px dashed rgba(251,191,36,.4);font-family:var(--ui)">+ Add Operation</button>
-          </div>
+          <div id="aled-sapi-items" style="display:flex;flex-direction:column;gap:8px"></div>
+          <button onclick="aledAddLayerItem('sapi')" style="width:100%;margin-top:7px;padding:5px;font-size:9px;font-weight:700;border-radius:6px;cursor:pointer;background:rgba(251,191,36,.1);color:#FBBF24;border:1px dashed rgba(251,191,36,.45);font-family:var(--ui)">+ Add System API</button>
         </div>
 
         <!-- DISPLAY OPTIONS -->
@@ -12428,47 +12351,198 @@ function aledClearLogo(side){
 }
 window.aledClearLogo = aledClearLogo;
 
-function addAledOp(layer, method){
-  var container = document.getElementById('aled-'+layer+'-ops');
-  if(!container) return;
-  var div = document.createElement('div');
-  div.style.cssText = 'display:flex;gap:4px;align-items:center;margin-bottom:2px';
-  var METH_LIST = ['GET','POST','PUT','DELETE','PATCH','HEAD','OPTIONS'];
-  var METH_CLR  = {GET:'#34D399',POST:'#60A5FA',PUT:'#FBBF24',DELETE:'#F87171',PATCH:'#C084FC',HEAD:'#94A3B8',OPTIONS:'#94A3B8'};
-  var selMethod = (method && METH_CLR[method]) ? method : 'GET';
-  var selColor  = METH_CLR[selMethod];
-  var opts = METH_LIST.map(function(m){ return '<option value="'+m+'"'+(selMethod===m?' selected':'')+'>'+m+'</option>'; }).join('');
-  var onchg = "var C={GET:'#34D399',POST:'#60A5FA',PUT:'#FBBF24',DELETE:'#F87171',PATCH:'#C084FC',HEAD:'#94A3B8',OPTIONS:'#94A3B8'};this.style.color=C[this.value]||'#94A3B8';this.style.borderColor=C[this.value]||'#94A3B8';";
-  div.innerHTML =
-    '<select onchange="'+onchg+'" style="font-size:10px;padding:3px 6px;width:82px;flex-shrink:0;font-weight:800;border-radius:5px;background:var(--input-bg);color:'+selColor+';border:2px solid '+selColor+'">'+opts+'</select>'
-    +'<button onclick="this.parentNode.remove()" style="padding:2px 7px;font-size:11px;border-radius:4px;cursor:pointer;background:rgba(239,68,68,.12);color:#FCA5A5;border:1px solid rgba(239,68,68,.2);">\u2715</button>';
-  container.appendChild(div);
-}
-window.addAledOp = addAledOp;
+// ── Multi-instance API layer management (EAPI / PAPI / SAPI) ───────────────
+// Each layer type holds an ARRAY of API instances, so users can add multiple
+// Experience / Process / System APIs to the same diagram.
+var METH_LIST = ['GET','POST','PUT','DELETE','PATCH','HEAD','OPTIONS'];
+var METH_CLR  = {GET:'#34D399',POST:'#60A5FA',PUT:'#FBBF24',DELETE:'#F87171',PATCH:'#C084FC',HEAD:'#94A3B8',OPTIONS:'#94A3B8'};
+var ALED_AUTH_OPTS  = ['Entra Id','OAuth 2.0','Client ID Enforcement','JWT','API Key','Basic Auth','mTLS','None'];
+var ALED_PROTO_OPTS = ['HTTPS','HTTP','WSS','gRPC'];
+var ALED_DEPLOY_OPTS= [['CH 2.0','CloudHub 2.0'],['CH 1.0','CloudHub 1.0'],['RTF','Runtime Fabric'],['On-Prem','On-Premises'],['Hybrid','Hybrid']];
+var ALED_LAYER_META = {
+  eapi:{clr:'#38BDF8', label:'Experience API', prefix:'my-experience-api', defAuth:'Entra Id', defPort:'443', defDeploy:'CH 2.0', opsLabel:'HTTP Methods — Client → EAPI'},
+  papi:{clr:'#A3E635', label:'Process API',    prefix:'my-process-api',    defAuth:'Client ID Enforcement', defPort:'443', defDeploy:'CH 2.0', opsLabel:'HTTP Methods — EAPI → PAPI'},
+  sapi:{clr:'#FBBF24', label:'System API',     prefix:'my-system-api',     defAuth:'OAuth 2.0', defPort:'8080', defDeploy:'On-Prem', opsLabel:'HTTP Methods — PAPI → SAPI'}
+};
 
-function getAledOps(layer){
-  var container = document.getElementById('aled-'+layer+'-ops');
-  if(!container) return [];
-  var ops = [];
-  Array.prototype.forEach.call(container.children, function(row){
-    var sel = row.querySelector('select');
-    if(sel && sel.value) ops.push({label: sel.value.trim()});
-  });
-  return ops;
+var _aledLayerData = { eapi:[], papi:[], sapi:[] };
+
+function aledNewLayerItem(type, idx){
+  var m = ALED_LAYER_META[type];
+  var n = (idx===0) ? m.prefix : m.prefix+'-'+(idx+1);
+  return {name:n, auth:m.defAuth, proto:'HTTPS', port:m.defPort, deploy:m.defDeploy, isNew:true, isEnh:false, ops:[{label:'GET'},{label:'POST'}]};
 }
-window.getAledOps = getAledOps;
+
+function aledAddLayerItem(type){
+  var arr = _aledLayerData[type];
+  arr.push(aledNewLayerItem(type, arr.length));
+  aledRenderLayerItems(type);
+  genALedDiagram();
+}
+window.aledAddLayerItem = aledAddLayerItem;
+
+function aledRemoveLayerItem(type, idx){
+  var arr = _aledLayerData[type];
+  if(arr.length<=1) return; // uncheck the layer checkbox to remove entirely
+  arr.splice(idx,1);
+  aledRenderLayerItems(type);
+  genALedDiagram();
+}
+window.aledRemoveLayerItem = aledRemoveLayerItem;
+
+function aledAddOp(type, idx, method){
+  var item = _aledLayerData[type][idx]; if(!item) return;
+  item.ops.push({label: (method && METH_CLR[method]) ? method : 'GET'});
+  aledRenderOps(type, idx);
+  genALedDiagram();
+}
+window.aledAddOp = aledAddOp;
+
+function aledRemoveOp(type, idx, opIdx){
+  var item = _aledLayerData[type][idx]; if(!item) return;
+  item.ops.splice(opIdx,1);
+  aledRenderOps(type, idx);
+  genALedDiagram();
+}
+window.aledRemoveOp = aledRemoveOp;
+
+function aledRenderOps(type, idx){
+  var container = document.getElementById('aled-'+type+'-ops-'+idx);
+  if(!container) return;
+  var item = _aledLayerData[type][idx];
+  container.innerHTML = '';
+  item.ops.forEach(function(op, oi){
+    var selColor = METH_CLR[op.label]||'#94A3B8';
+    var row = document.createElement('div');
+    row.style.cssText = 'display:flex;gap:4px;align-items:center;margin-bottom:2px';
+    var opts = METH_LIST.map(function(m){ return '<option value="'+m+'"'+(op.label===m?' selected':'')+'>'+m+'</option>'; }).join('');
+    row.innerHTML = '<select style="font-size:10px;padding:3px 6px;width:82px;flex-shrink:0;font-weight:800;border-radius:5px;background:var(--input-bg);color:'+selColor+';border:2px solid '+selColor+'">'+opts+'</select>'
+      +'<button style="padding:2px 7px;font-size:11px;border-radius:4px;cursor:pointer;background:rgba(239,68,68,.12);color:#FCA5A5;border:1px solid rgba(239,68,68,.2);">\u2715</button>';
+    var sel = row.querySelector('select');
+    sel.addEventListener('change', (function(oidx){ return function(){
+      item.ops[oidx].label = this.value;
+      var c = METH_CLR[this.value]||'#94A3B8';
+      this.style.color = c; this.style.borderColor = c;
+      genALedDiagram();
+    }; })(oi));
+    row.querySelector('button').addEventListener('click', (function(oidx){ return function(){ aledRemoveOp(type, idx, oidx); }; })(oi));
+    container.appendChild(row);
+  });
+}
+
+function aledRenderLayerItems(type){
+  var wrap = document.getElementById('aled-'+type+'-items'); if(!wrap) return;
+  var meta = ALED_LAYER_META[type];
+  var arr = _aledLayerData[type];
+  wrap.innerHTML = '';
+  arr.forEach(function(item, idx){
+    var card = document.createElement('div');
+    card.style.cssText = 'background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:7px;display:flex;flex-direction:column;gap:5px';
+
+    // Header row: label + remove
+    var hdr = document.createElement('div');
+    hdr.style.cssText = 'display:flex;align-items:center;justify-content:space-between';
+    var hlbl = document.createElement('span');
+    hlbl.style.cssText = 'font-size:9.5px;font-weight:800;color:'+meta.clr+';text-transform:uppercase;letter-spacing:.04em';
+    hlbl.textContent = meta.label+' #'+(idx+1);
+    hdr.appendChild(hlbl);
+    if(arr.length>1){
+      var rm = document.createElement('button');
+      rm.textContent = '✕ Remove';
+      rm.style.cssText = 'font-size:9px;padding:2px 6px;border-radius:4px;cursor:pointer;background:rgba(239,68,68,.1);color:#FCA5A5;border:1px solid rgba(239,68,68,.2)';
+      rm.addEventListener('click', (function(i){ return function(){ aledRemoveLayerItem(type,i); }; })(idx));
+      hdr.appendChild(rm);
+    }
+    card.appendChild(hdr);
+
+    // Name input
+    var nameInput = document.createElement('input');
+    nameInput.type = 'text'; nameInput.value = item.name; nameInput.placeholder = 'API name';
+    nameInput.style.cssText = 'width:100%;box-sizing:border-box;font-size:10px;border-radius:6px;padding:4px 8px;background:var(--input-bg);color:var(--input-txt);border:1px solid '+meta.clr+'55';
+    nameInput.addEventListener('input', function(){ item.name = this.value; genALedDiagram(); });
+    card.appendChild(nameInput);
+
+    // Auth / Proto / Port row
+    var row1 = document.createElement('div');
+    row1.style.cssText = 'display:grid;grid-template-columns:1fr 60px 44px;gap:4px';
+    var authSel = document.createElement('select');
+    authSel.style.cssText = 'font-size:9px;border-radius:5px;padding:3px 5px;background:var(--input-bg);color:var(--input-txt);border:1px solid '+meta.clr+'55';
+    ALED_AUTH_OPTS.forEach(function(a){ var o=document.createElement('option'); o.value=a; o.textContent=a; if(a===item.auth) o.selected=true; authSel.appendChild(o); });
+    authSel.addEventListener('change', function(){ item.auth = this.value; genALedDiagram(); });
+    var protoSel = document.createElement('select');
+    protoSel.style.cssText = 'font-size:9px;border-radius:5px;padding:3px 4px;background:var(--input-bg);color:var(--input-txt);border:1px solid '+meta.clr+'55';
+    ALED_PROTO_OPTS.forEach(function(p){ var o=document.createElement('option'); o.value=p; o.textContent=p; if(p===item.proto) o.selected=true; protoSel.appendChild(o); });
+    protoSel.addEventListener('change', function(){ item.proto = this.value; genALedDiagram(); });
+    var portInput = document.createElement('input');
+    portInput.type='text'; portInput.value=item.port; portInput.placeholder='Port';
+    portInput.style.cssText = 'font-size:9px;border-radius:5px;padding:3px 4px;background:var(--input-bg);color:var(--input-txt);border:1px solid '+meta.clr+'55;text-align:center';
+    portInput.addEventListener('input', function(){ item.port = this.value; genALedDiagram(); });
+    row1.appendChild(authSel); row1.appendChild(protoSel); row1.appendChild(portInput);
+    card.appendChild(row1);
+
+    // New / Enhanced
+    var row2 = document.createElement('div');
+    row2.style.cssText = 'display:flex;gap:8px';
+    var newLbl = document.createElement('label');
+    newLbl.style.cssText = 'display:flex;align-items:center;gap:4px;font-size:9px;cursor:pointer';
+    var newChk = document.createElement('input'); newChk.type='checkbox'; newChk.checked=!!item.isNew; newChk.style.cssText='accent-color:#4CAF50;width:12px;height:12px';
+    newChk.addEventListener('change', function(){ item.isNew = this.checked; genALedDiagram(); });
+    newLbl.appendChild(newChk); newLbl.appendChild(document.createTextNode(' '));
+    var newSpan=document.createElement('span'); newSpan.style.cssText='color:#4CAF50;font-weight:700'; newSpan.textContent='New ●'; newLbl.appendChild(newSpan);
+    var enhLbl = document.createElement('label');
+    enhLbl.style.cssText = 'display:flex;align-items:center;gap:4px;font-size:9px;cursor:pointer';
+    var enhChk = document.createElement('input'); enhChk.type='checkbox'; enhChk.checked=!!item.isEnh; enhChk.style.cssText='accent-color:#9E9E9E;width:12px;height:12px';
+    enhChk.addEventListener('change', function(){ item.isEnh = this.checked; genALedDiagram(); });
+    enhLbl.appendChild(enhChk); enhLbl.appendChild(document.createTextNode(' '));
+    var enhSpan=document.createElement('span'); enhSpan.style.cssText='color:#9E9E9E;font-weight:700'; enhSpan.textContent='Enhanced ●'; enhLbl.appendChild(enhSpan);
+    row2.appendChild(newLbl); row2.appendChild(enhLbl);
+    card.appendChild(row2);
+
+    // Deploy
+    var row3 = document.createElement('div');
+    row3.style.cssText = 'display:flex;align-items:center;gap:6px';
+    var dLbl = document.createElement('span'); dLbl.style.cssText='font-size:9px;font-weight:700;color:var(--txt3);flex-shrink:0'; dLbl.textContent='Deploy';
+    var dSel = document.createElement('select');
+    dSel.style.cssText = 'flex:1;font-size:9px;border-radius:5px;padding:3px 5px;background:var(--input-bg);color:var(--input-txt);border:1px solid '+meta.clr+'55';
+    ALED_DEPLOY_OPTS.forEach(function(pair){ var o=document.createElement('option'); o.value=pair[0]; o.textContent=pair[1]; if(pair[0]===item.deploy) o.selected=true; dSel.appendChild(o); });
+    dSel.addEventListener('change', function(){ item.deploy = this.value; genALedDiagram(); });
+    row3.appendChild(dLbl); row3.appendChild(dSel);
+    card.appendChild(row3);
+
+    // Ops
+    var opsHdr = document.createElement('div');
+    opsHdr.style.cssText = 'font-size:9px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.04em;margin-top:2px';
+    opsHdr.textContent = meta.opsLabel;
+    card.appendChild(opsHdr);
+    var opsContainer = document.createElement('div');
+    opsContainer.id = 'aled-'+type+'-ops-'+idx;
+    opsContainer.style.cssText = 'display:flex;flex-direction:column;gap:3px';
+    card.appendChild(opsContainer);
+    var addOpBtn = document.createElement('button');
+    addOpBtn.textContent = '+ Add Operation';
+    addOpBtn.style.cssText = 'width:100%;padding:4px;font-size:9px;font-weight:700;border-radius:6px;cursor:pointer;background:'+meta.clr+'14;color:'+meta.clr+';border:1px dashed '+meta.clr+'66;font-family:var(--ui)';
+    addOpBtn.addEventListener('click', function(){ aledAddOp(type, idx); });
+    card.appendChild(addOpBtn);
+
+    wrap.appendChild(card);
+    aledRenderOps(type, idx);
+  });
+}
+window.aledRenderLayerItems = aledRenderLayerItems;
 
 function initALedDiagram(){
-  if(!document.getElementById('aled-eapi-ops')) return;
-  if(document.getElementById('aled-eapi-ops').children.length===0){
+  if(!document.getElementById('aled-eapi-items')) return;
+  if(_aledLayerData.eapi.length===0){
     aledLoadSample(); // aledLoadSample already calls genALedDiagram
   } else {
     aledRenderConsumers();
     aledRenderBackends();
+    aledRenderLayerItems('eapi');
+    aledRenderLayerItems('papi');
+    aledRenderLayerItems('sapi');
     genALedDiagram();
   }
 }
-window.initALedDiagram = initALedDiagram;
 window.initALedDiagram = initALedDiagram;
 
 // ── Multi-Consumer / Multi-Backend Management ──────────────────────────────
@@ -12492,6 +12566,12 @@ var BACKEND_TYPES  = ['CRM','ERP','DB','MQ','LDAP','S3','REST','SOAP','FTP','Cac
 function aledRenderConsumers() {
   var list = document.getElementById('aled-consumers-list'); if (!list) return;
   list.innerHTML = '';
+  if (_aledConsumers.length === 0) {
+    var empty = document.createElement('div');
+    empty.style.cssText = 'font-size:9.5px;color:var(--txt3);font-style:italic;padding:4px 2px';
+    empty.textContent = 'No consumers — this layer will be hidden from the diagram.';
+    list.appendChild(empty);
+  }
   _aledConsumers.forEach(function(c, i) {
     var row = document.createElement('div');
     row.style.cssText = 'display:flex;align-items:center;gap:5px;background:rgba(96,165,250,.07);border:1px solid rgba(96,165,250,.2);border-radius:7px;padding:5px 7px';
@@ -12538,14 +12618,12 @@ function aledRenderConsumers() {
     colorInput.addEventListener('input', (function(idx){ return function(){ _aledConsumers[idx].color = this.value; genALedDiagram(); }; })(i));
     row.appendChild(colorInput);
 
-    // Delete button (not for first item)
-    if (i > 0) {
-      var delBtn = document.createElement('button');
-      delBtn.textContent = '✕';
-      delBtn.style.cssText = 'font-size:11px;padding:0 5px;border-radius:4px;cursor:pointer;background:rgba(239,68,68,.1);color:#FCA5A5;border:1px solid rgba(239,68,68,.2)';
-      delBtn.addEventListener('click', (function(idx){ return function(){ _aledConsumers.splice(idx,1); aledRenderConsumers(); genALedDiagram(); }; })(i));
-      row.appendChild(delBtn);
-    }
+    // Delete button (consumers are optional — even the last one can be removed)
+    var delBtn = document.createElement('button');
+    delBtn.textContent = '✕';
+    delBtn.style.cssText = 'font-size:11px;padding:0 5px;border-radius:4px;cursor:pointer;background:rgba(239,68,68,.1);color:#FCA5A5;border:1px solid rgba(239,68,68,.2)';
+    delBtn.addEventListener('click', (function(idx){ return function(){ _aledConsumers.splice(idx,1); aledRenderConsumers(); genALedDiagram(); }; })(i));
+    row.appendChild(delBtn);
 
     list.appendChild(row);
   });
@@ -12695,21 +12773,13 @@ function aledLoadSample(){
     {name:'PostgreSQL DB',icon:'🗄️', color:'#A78BFA', type:'DB'},
   ];
   aledRenderConsumers(); aledRenderBackends();
-  sv('aled-eapi-name','my-experience-api'); sv('aled-eapi-auth','Entra Id');
-  sv('aled-eapi-proto','HTTPS'); sv('aled-eapi-port','443'); sv('aled-eapi-deploy','CH 2.0');
-  ck('aled-has-eapi',true); ck('aled-eapi-new',true); ck('aled-eapi-enh',false);
-  sv('aled-papi-name','my-process-api'); sv('aled-papi-auth','Client ID Enforcement');
-  sv('aled-papi-proto','HTTPS'); sv('aled-papi-port','443'); sv('aled-papi-deploy','CH 2.0');
-  ck('aled-has-papi',true); ck('aled-papi-new',true); ck('aled-papi-enh',false);
-  sv('aled-sapi-name','my-system-api'); sv('aled-sapi-auth','OAuth 2.0');
-  sv('aled-sapi-proto','HTTPS'); sv('aled-sapi-port','8080'); sv('aled-sapi-deploy','On-Prem');
-  ck('aled-has-sapi',true); ck('aled-sapi-new',false); ck('aled-sapi-enh',true);
-  ['eapi','papi','sapi'].forEach(function(l){
-    var el=document.getElementById('aled-'+l+'-ops'); if(el) el.innerHTML='';
-  });
-  addAledOp('eapi','GET'); addAledOp('eapi','POST'); addAledOp('eapi','PUT');
-  addAledOp('papi','GET'); addAledOp('papi','POST'); addAledOp('papi','DELETE');
-  addAledOp('sapi','GET'); addAledOp('sapi','POST'); addAledOp('sapi','PATCH');
+  ck('aled-has-eapi',true); ck('aled-has-papi',true); ck('aled-has-sapi',true);
+  _aledLayerData = {
+    eapi: [ {name:'my-experience-api', auth:'Entra Id', proto:'HTTPS', port:'443', deploy:'CH 2.0', isNew:true, isEnh:false, ops:[{label:'GET'},{label:'POST'},{label:'PUT'}]} ],
+    papi: [ {name:'my-process-api', auth:'Client ID Enforcement', proto:'HTTPS', port:'443', deploy:'CH 2.0', isNew:true, isEnh:false, ops:[{label:'GET'},{label:'POST'},{label:'DELETE'}]} ],
+    sapi: [ {name:'my-system-api', auth:'OAuth 2.0', proto:'HTTPS', port:'8080', deploy:'On-Prem', isNew:false, isEnh:true, ops:[{label:'GET'},{label:'POST'},{label:'PATCH'}]} ]
+  };
+  aledRenderLayerItems('eapi'); aledRenderLayerItems('papi'); aledRenderLayerItems('sapi');
   genALedDiagram();
   setMsg('Sample loaded ✓');
 }
@@ -12732,7 +12802,8 @@ function genALedDiagram(){
   var darkBg  = gc('aled-dark-bg');
   var logos   = window._aledLogos || {};
 
-  // Collect active layers
+  // Collect active layer groups — each group (EAPI/PAPI/SAPI) can now contain
+  // MULTIPLE API instances, rendered side-by-side within that layer's row.
   var layerDefs = [
     {id:'eapi', label:'EAPI', fullLabel:'Experience API', color:'#38BDF8', stroke:'rgba(56,189,248,.6)', fill:'rgba(56,189,248,.12)', glow:'rgba(56,189,248,.2)'},
     {id:'papi', label:'PAPI', fullLabel:'Process API',    color:'#A3E635', stroke:'rgba(163,230,53,.6)',  fill:'rgba(163,230,53,.12)', glow:'rgba(163,230,53,.2)'},
@@ -12740,14 +12811,23 @@ function genALedDiagram(){
   ];
   var layers = layerDefs.filter(function(ld){
     var el = document.getElementById('aled-has-'+ld.id);
-    return !el || el.checked;
+    var enabled = !el || el.checked;
+    var arr = (_aledLayerData && _aledLayerData[ld.id]) || [];
+    return enabled && arr.length>0;
   }).map(function(ld){
-    // Collect auth options for display
-    var authEl = document.getElementById('aled-'+ld.id+'-auth');
-    var authVal = authEl ? authEl.value : 'OAuth 2.0';
-    // Get selected value from proto select
-    var protoEl = document.getElementById('aled-'+ld.id+'-proto');
-    var protoVal = protoEl ? protoEl.value : 'HTTPS';
+    var arr = _aledLayerData[ld.id] || [];
+    var items = arr.map(function(it){
+      return {
+        name:   it.name || (ld.id+'-api'),
+        auth:   it.auth || 'OAuth 2.0',
+        proto:  it.proto || 'HTTPS',
+        port:   it.port || '443',
+        deploy: it.deploy || 'CH 2.0',
+        isNew:  !!it.isNew,
+        isEnh:  !!it.isEnh,
+        ops:    (it.ops||[]).slice(),
+      };
+    });
     return {
       id:       ld.id,
       label:    ld.label,
@@ -12756,14 +12836,7 @@ function genALedDiagram(){
       stroke:   ld.stroke,
       fill:     ld.fill,
       glow:     ld.glow,
-      name:     gv('aled-'+ld.id+'-name'),
-      auth:     authVal,
-      proto:    protoVal,
-      port:     gv('aled-'+ld.id+'-port') || '443',
-      deploy:   gv('aled-'+ld.id+'-deploy') || 'CH 2.0',
-      isNew:    gc('aled-'+ld.id+'-new'),
-      isEnh:    gc('aled-'+ld.id+'-enh'),
-      ops:      getAledOps(ld.id),
+      items:    items,
     };
   });
 
@@ -12779,7 +12852,12 @@ function genALedDiagram(){
   var LEG_H  = showLeg ? 60 : 0;
   var CX     = W/2;
   var GAP_H  = 28;   // extra room for section labels
-  var H = TOP_H + GAP_H + CLI_H + layers.length*(ARR_H+BOX_H) + ARR_H + BCK_H + LEG_H + 80;
+  var hasConsumers = (typeof _aledConsumers !== 'undefined') && _aledConsumers.length > 0;
+  var BOX_H_MULTI = 128; // taller card row when a layer has multiple APIs, so there's room for badges + logo without crowding
+  var layerBoxHeights = layers.map(function(lg){ return lg.items.length>1 ? BOX_H_MULTI : BOX_H; });
+  var sumLayerBoxH = layerBoxHeights.reduce(function(a,b){return a+b;},0);
+  var H = TOP_H + GAP_H + CLI_H + layers.length*ARR_H + sumLayerBoxH + ARR_H + BCK_H + LEG_H + 80;
+  if(!hasConsumers) H -= (CLI_H + ARR_H); // consumers layer is optional
 
   // ── Colors ───────────────────────────────────────────────
   var bg     = darkBg ? '#0D1117' : '#F0F6FF';
@@ -12865,9 +12943,12 @@ function genALedDiagram(){
   }
 
   // ── Declare consumers and backends EARLY (used in both rows and fan arrows) ──
-  var consumers = (typeof _aledConsumers !== 'undefined' && _aledConsumers.length) ? _aledConsumers : [{name:'Consumer App', icon:'\uD83D\uDC64', color:'#60A5FA'}];
+  // Consumers are OPTIONAL: if the user removes all of them, this whole layer
+  // (row + fan arrows) is skipped and the diagram starts directly at EAPI.
+  var consumers = (typeof _aledConsumers !== 'undefined') ? _aledConsumers : [];
   var backends  = (typeof _aledBackends  !== 'undefined' && _aledBackends.length)  ? _aledBackends  : [{name:'Backend System', icon:'\uD83D\uDCC4', color:'#64748B', type:'System'}];
 
+  if(hasConsumers){
   // ── CONSUMERS ROW (multiple) ──────────────────────────────
   var numC = consumers.length;
   var cBoxW = Math.min(Math.floor((BOX_W - (numC-1)*12) / numC), 240);
@@ -12930,103 +13011,141 @@ function genALedDiagram(){
     }
   });
   curY += fanArrH;
+  } // end hasConsumers guard
 
-  // ── LAYERS ───────────────────────────────────────────────
-  layers.forEach(function(layer, li){
+  // ── LAYERS (each group may hold MULTIPLE API instances, drawn side-by-side) ──
+  var MULE_URI='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iNjQiIGhlaWdodD0iNjQiPjxnIHRyYW5zZm9ybT0ibWF0cml4KDEuOTE4OTYxIDAgMCAxLjkxODk2MSAtOS41OTQ4MDcgLTI1LjU2ODgxNikiPjxnIHRyYW5zZm9ybT0ibWF0cml4KC4xMDI3NDYgMCAwIC4xMDI3NDYgNC41MjczNyAxMy4wMTA5MykiPjxkZWZzPjxwYXRoIGlkPSJBIiBkPSJNNC42IDMuN2gxMDk1LjZWMzI3SDQuNnoiLz48L2RlZnM+PGNsaXBQYXRoIGlkPSJCIj48dXNlIHhsaW5rOmhyZWY9IiNBIi8+PC9jbGlwUGF0aD48cGF0aCBjbGlwLXBhdGg9InVybCgjQikiIGQ9Ik0xNjYuOSAzMTQuNWMtODEuOCAwLTE0OC4xLTY2LjMtMTQ4LjEtMTQ4LjFDMTguNyA4NC41IDg1IDE4LjIgMTY2LjkgMTguMmM4MS44IDAgMTQ4LjEgNjYuMyAxNDguMSAxNDguMXMtNjYuMyAxNDguMi0xNDguMSAxNDguMnptLS4xLTMxMC44Qzc3LjMgMy43IDQuNSA3Ni4yIDQuNSAxNjUuMyA0LjUgMjU0LjUgNzcuMyAzMjcgMTY2LjggMzI3czE2Mi40LTcyLjUgMTYyLjQtMTYxLjZjMC04OS4yLTcyLjgtMTYxLjctMTYyLjQtMTYxLjd6IiBmaWxsPSIjMDBhMWRmIi8+PC9nPjxwYXRoIGQ9Ik0xNy40NDMgMzcuNDU0Yy0yLjUxNy0xLjE4Mi00LjI2NC0zLjg1My00LjI2NC02Ljk0NiAwLTEuNjM0LjQ4My0zLjE0NCAxLjMxNS00LjM3N2w1LjQ4NyA4LjE4aDMuMzJsNS40ODctOC4xOGMuODMyIDEuMjMzIDEuMzE1IDIuNzU0IDEuMzE1IDQuMzc3IDAgMi44ODctMS41MiA1LjM5NC0zLjc2IDYuNjlsMS4wNTggNC4wNDhjNC4wMjgtMi4wNzUgNi43Ny02LjI2OCA2Ljc3LTExLjEwNyAwLTQuNTcyLTIuNDU2LTguNTYtNi4xMTMtMTAuNzM3bC02LjM3IDkuODMzLTYuMzEtOS44NzRjLTMuNyAyLjE2OC02LjE4NSA2LjE4NS02LjE4NSAxMC43NzggMCA1LjAxNCAyLjk1IDkuMzQgNy4yMTMgMTEuMzIzeiIgZmlsbD0iIzAwYTFkZiIvPjwvZz48L3N2Zz4=';
+
+  layers.forEach(function(layerGroup, li){
     var aY=curY, aMid=aY+ARR_H/2;
     var aTop=aY+2, aBot=aY+ARR_H-2;
     var reqX=CX-26, resX=CX+26;
 
-    // Skip arrow before first layer (already drawn above as fan)
-    // Between-layer arrows (skipped before first layer which uses fan arrows)
+    // Skip arrow before first layer (already drawn above as fan, or omitted if no consumers)
     if(li > 0){
-      // REQ ↓ polygon
       s += '<line x1="'+reqX+'" y1="'+aTop+'" x2="'+reqX+'" y2="'+(aBot-9)+'" stroke="#22C55E" stroke-width="3"/>';
       s += '<polygon points="'+(reqX-7)+','+(aBot-9)+' '+(reqX+7)+','+(aBot-9)+' '+reqX+','+aBot+'" fill="#22C55E"/>';
-      // RES ↑ polygon
       s += '<line x1="'+resX+'" y1="'+aBot+'" x2="'+resX+'" y2="'+(aTop+9)+'" stroke="#3B82F6" stroke-width="3"/>';
       s += '<polygon points="'+(resX-7)+','+(aTop+9)+' '+(resX+7)+','+(aTop+9)+' '+resX+','+aTop+'" fill="#3B82F6"/>';
-      // Labels
       s += '<text x="'+(reqX-10)+'" y="'+(aMid+4)+'" text-anchor="end" font-size="9" font-weight="800" fill="#22C55E">REQ</text>';
       s += '<text x="'+(resX+10)+'" y="'+(aMid+4)+'" text-anchor="start" font-size="9" font-weight="800" fill="#3B82F6">RES</text>';
       curY += ARR_H;
     }
 
-    // Card with glow
-    s += renderCard(PAD, curY, BOX_W, BOX_H, 12, layer.glow);
-    // Left colour accent strip
-    s += '<rect x="'+PAD+'" y="'+curY+'" width="6" height="'+BOX_H+'" rx="3" fill="'+layer.color+'"/>';
-
-    // ── LABEL PILL (EAPI/PAPI/SAPI) ──
-    var LX=PAD+18, pillW=54, pillH=24;
-    s += '<rect x="'+LX+'" y="'+(curY+12)+'" width="'+pillW+'" height="'+pillH+'" rx="8" fill="'+layer.color+'" opacity=".2" stroke="'+layer.color+'" stroke-width="1.5"/>';
-    s += '<text x="'+(LX+pillW/2)+'" y="'+(curY+28)+'" text-anchor="middle" font-size="11" font-weight="900" fill="'+layer.color+'">'+layer.label+'</text>';
-
-    // ── API NAME ──
-    s += '<text x="'+(LX+pillW+10)+'" y="'+(curY+28)+'" font-size="14" font-weight="800" fill="'+txt+'">'+esc(layer.name)+'</text>';
-    // Full layer name subtitle
-    s += '<text x="'+(LX+pillW+10)+'" y="'+(curY+44)+'" font-size="9.5" fill="'+txt2+'" font-style="italic">'+layer.fullLabel+'</text>';
-
-    // ── AUTH BADGE ──
-    var badgeX=LX+pillW+10, badgeY=curY+52;
-    var authW=Math.max(layer.auth.length*6+20, 68);
-    s += '<rect x="'+badgeX+'" y="'+badgeY+'" width="'+authW+'" height="22" rx="6" fill="'+layer.color+'" opacity=".15" stroke="'+layer.color+'" stroke-width="1"/>';
-    s += '<text x="'+(badgeX+authW/2)+'" y="'+(badgeY+15)+'" text-anchor="middle" font-size="9" font-weight="700" fill="'+layer.color+'">'+esc(layer.auth)+'</text>';
-
-    // ── PROTO:PORT BADGE ──
-    if(showPort){
-      var protoLabel = layer.proto+':'+layer.port;
-      var protoW = Math.max(protoLabel.length*6+16, 62);
-      var protoX = badgeX+authW+8;
-      s += '<rect x="'+protoX+'" y="'+badgeY+'" width="'+protoW+'" height="22" rx="6" fill="rgba(100,116,139,.18)"/>';
-      s += '<text x="'+(protoX+protoW/2)+'" y="'+(badgeY+15)+'" text-anchor="middle" font-size="9" font-weight="600" fill="'+txt2+'">'+esc(protoLabel)+'</text>';
+    // Section label when this layer holds multiple API instances
+    var items = layerGroup.items;
+    var nI = items.length;
+    if(nI > 1){
+      s += '<text x="'+CX+'" y="'+(curY-6)+'" text-anchor="middle" font-size="9" font-weight="800" fill="'+txt2+'" letter-spacing="1.5">'+layerGroup.fullLabel.toUpperCase()+'S</text>';
     }
 
-    // ── NEW / ENHANCED dots — leftmost bottom ──
-    var dotX = LX, dotY = curY + BOX_H - 18;
-    if(layer.isNew){
-      s += '<circle cx="'+dotX+'" cy="'+dotY+'" r="8" fill="#22C55E"/>';
-      s += '<text x="'+dotX+'" y="'+(dotY+4)+'" text-anchor="middle" font-size="9" font-weight="900" fill="#fff">N</text>';
-      s += '<text x="'+(dotX+14)+'" y="'+(dotY+4)+'" font-size="9" font-weight="600" fill="#22C55E">New API</text>';
-      dotX += 72;
-    }
-    if(layer.isEnh){
-      s += '<circle cx="'+dotX+'" cy="'+dotY+'" r="8" fill="#94A3B8"/>';
-      s += '<text x="'+dotX+'" y="'+(dotY+4)+'" text-anchor="middle" font-size="9" font-weight="900" fill="#fff">E</text>';
-      s += '<text x="'+(dotX+14)+'" y="'+(dotY+4)+'" font-size="9" font-weight="600" fill="#94A3B8">Enhanced</text>';
-    }
+    var boxH = layerBoxHeights[li];
+    var itemGap = 14;
+    var itemW = Math.floor((BOX_W - (nI-1)*itemGap) / nI);
+    var totalItemsW = nI*itemW + (nI-1)*itemGap;
+    var itemsStartX = PAD + Math.floor((BOX_W - totalItemsW)/2);
 
-    // ── MULE LOGO (centre) ──
-    var MCX=CX, MCY=curY+BOX_H/2;
-    var MULE_URI='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iNjQiIGhlaWdodD0iNjQiPjxnIHRyYW5zZm9ybT0ibWF0cml4KDEuOTE4OTYxIDAgMCAxLjkxODk2MSAtOS41OTQ4MDcgLTI1LjU2ODgxNikiPjxnIHRyYW5zZm9ybT0ibWF0cml4KC4xMDI3NDYgMCAwIC4xMDI3NDYgNC41MjczNyAxMy4wMTA5MykiPjxkZWZzPjxwYXRoIGlkPSJBIiBkPSJNNC42IDMuN2gxMDk1LjZWMzI3SDQuNnoiLz48L2RlZnM+PGNsaXBQYXRoIGlkPSJCIj48dXNlIHhsaW5rOmhyZWY9IiNBIi8+PC9jbGlwUGF0aD48cGF0aCBjbGlwLXBhdGg9InVybCgjQikiIGQ9Ik0xNjYuOSAzMTQuNWMtODEuOCAwLTE0OC4xLTY2LjMtMTQ4LjEtMTQ4LjFDMTguNyA4NC41IDg1IDE4LjIgMTY2LjkgMTguMmM4MS44IDAgMTQ4LjEgNjYuMyAxNDguMSAxNDguMXMtNjYuMyAxNDguMi0xNDguMSAxNDguMnptLS4xLTMxMC44Qzc3LjMgMy43IDQuNSA3Ni4yIDQuNSAxNjUuMyA0LjUgMjU0LjUgNzcuMyAzMjcgMTY2LjggMzI3czE2Mi40LTcyLjUgMTYyLjQtMTYxLjZjMC04OS4yLTcyLjgtMTYxLjctMTYyLjQtMTYxLjd6IiBmaWxsPSIjMDBhMWRmIi8+PC9nPjxwYXRoIGQ9Ik0xNy40NDMgMzcuNDU0Yy0yLjUxNy0xLjE4Mi00LjI2NC0zLjg1My00LjI2NC02Ljk0NiAwLTEuNjM0LjQ4My0zLjE0NCAxLjMxNS00LjM3N2w1LjQ4NyA4LjE4aDMuMzJsNS40ODctOC4xOGMuODMyIDEuMjMzIDEuMzE1IDIuNzU0IDEuMzE1IDQuMzc3IDAgMi44ODctMS41MiA1LjM5NC0zLjc2IDYuNjlsMS4wNTggNC4wNDhjNC4wMjgtMi4wNzUgNi43Ny02LjI2OCA2Ljc3LTExLjEwNyAwLTQuNTcyLTIuNDU2LTguNTYtNi4xMTMtMTAuNzM3bC02LjM3IDkuODMzLTYuMzEtOS44NzRjLTMuNyAyLjE2OC02LjE4NSA2LjE4NS02LjE4NSAxMC43NzggMCA1LjAxNCAyLjk1IDkuMzQgNy4yMTMgMTEuMzIzeiIgZmlsbD0iIzAwYTFkZiIvPjwvZz48L3N2Zz4=';
-    s += '<image href="'+MULE_URI+'" x="'+(MCX-32)+'" y="'+(MCY-32)+'" width="64" height="64"/>';
+    items.forEach(function(layer, ii){
+      var bx = itemsStartX + ii*(itemW+itemGap);
+      var bw = itemW;
 
-    // ── RIGHT SIDE: BIZ GROUP + DEPLOY + METHODS ──
-    var RX=W-PAD-12;
-    // Biz group
-    s += '<text x="'+RX+'" y="'+(curY+18)+'" text-anchor="end" font-size="9.5" font-weight="700" fill="'+txt2+'">'+esc(bizGrp)+'</text>';
-    // Deploy badge
-    var dpW=Math.max(layer.deploy.length*6.5+20,68), dpX=RX-dpW;
-    s += deployBadge(dpX, curY+24, layer.deploy);
+      // Card with glow
+      s += renderCard(bx, curY, bw, boxH, 12, layerGroup.glow);
+      // Left colour accent strip
+      s += '<rect x="'+bx+'" y="'+curY+'" width="6" height="'+boxH+'" rx="3" fill="'+layerGroup.color+'"/>';
 
-    // Method pills — single row at bottom of card, right-aligned, side by side
-    var ops=layer.ops;
-    if(ops.length>0){
-      var pillH=22, pillGap=5;
-      // Calculate total width of all pills to right-align them
-      var pillWidths=ops.map(function(op){ return (op.label||'GET').length*6.5+18; });
-      var totalPillW=pillWidths.reduce(function(a,b){return a+b;},0)+pillGap*(ops.length-1);
-      var pillStartX=RX-totalPillW;
-      var pillY=curY+BOX_H-pillH-8;
-      var px=pillStartX;
-      ops.forEach(function(op,oi){
-        var meth=(op.label||'GET').toUpperCase();
-        s += methodPill(px, pillY, meth);
-        px += pillWidths[oi]+pillGap;
-      });
-    }
+      // ── LABEL PILL (EAPI/PAPI/SAPI) ──
+      var LX=bx+16, pillW=(nI===1?54:48), pillH=(nI===1?24:20);
+      s += '<rect x="'+LX+'" y="'+(curY+10)+'" width="'+pillW+'" height="'+pillH+'" rx="7" fill="'+layerGroup.color+'" opacity=".2" stroke="'+layerGroup.color+'" stroke-width="1.5"/>';
+      s += '<text x="'+(LX+pillW/2)+'" y="'+(curY+10+pillH/2+4)+'" text-anchor="middle" font-size="'+(nI===1?11:10)+'" font-weight="900" fill="'+layerGroup.color+'">'+layerGroup.label+'</text>';
 
-    curY += BOX_H;
+      // ── API NAME ──
+      var nameX = LX+pillW+8;
+      var nameFont = nI===1?14:12;
+      var nameMaxChars = Math.max(6, Math.floor((bw-(pillW+40))/(nameFont*0.62)));
+      var dispName = layer.name.length>nameMaxChars ? layer.name.slice(0,nameMaxChars-1)+'…' : layer.name;
+      s += '<text x="'+nameX+'" y="'+(curY+10+pillH/2+4)+'" font-size="'+nameFont+'" font-weight="800" fill="'+txt+'">'+esc(dispName)+'</text>';
+      // Full layer name subtitle (single-item rows only — no room when stacked)
+      if(nI===1){
+        s += '<text x="'+nameX+'" y="'+(curY+44)+'" font-size="9.5" fill="'+txt2+'" font-style="italic">'+layerGroup.fullLabel+'</text>';
+      }
+
+      // ── AUTH BADGE ──
+      var badgeY = curY + (nI===1?52:36);
+      var authW=Math.max(layer.auth.length*(nI===1?6:5.3)+18, nI===1?68:56);
+      s += '<rect x="'+LX+'" y="'+badgeY+'" width="'+authW+'" height="'+(nI===1?22:19)+'" rx="6" fill="'+layerGroup.color+'" opacity=".15" stroke="'+layerGroup.color+'" stroke-width="1"/>';
+      s += '<text x="'+(LX+authW/2)+'" y="'+(badgeY+(nI===1?15:13))+'" text-anchor="middle" font-size="'+(nI===1?9:8.2)+'" font-weight="700" fill="'+layerGroup.color+'">'+esc(layer.auth)+'</text>';
+
+      // ── PROTO:PORT BADGE ──
+      if(showPort){
+        var protoLabel = layer.proto+':'+layer.port;
+        var protoW = Math.max(protoLabel.length*(nI===1?6:5.3)+14, nI===1?62:50);
+        var protoX = LX+authW+6;
+        if(protoX+protoW <= bx+bw-6){
+          s += '<rect x="'+protoX+'" y="'+badgeY+'" width="'+protoW+'" height="'+(nI===1?22:19)+'" rx="6" fill="rgba(100,116,139,.18)"/>';
+          s += '<text x="'+(protoX+protoW/2)+'" y="'+(badgeY+(nI===1?15:13))+'" text-anchor="middle" font-size="'+(nI===1?9:8.2)+'" font-weight="600" fill="'+txt2+'">'+esc(protoLabel)+'</text>';
+        }
+      }
+
+      // ── MULE LOGO — full centred logo for a single API; smaller centred logo in its own row (below badges, above dots/methods) for multi-API cards ──
+      if(nI === 1){
+        var MCX=bx+bw/2, MCY=curY+boxH/2;
+        s += '<image href="'+MULE_URI+'" x="'+(MCX-32)+'" y="'+(MCY-32)+'" width="64" height="64"/>';
+      } else {
+        var mlSize = 34;
+        var mlCX = bx+bw/2, mlCY = curY+79; // fixed band: clear of the auth/proto badges above (~y+55) and dots/method-pills below (~y+102)
+        s += '<circle cx="'+mlCX+'" cy="'+mlCY+'" r="'+(mlSize/2+4)+'" fill="rgba(255,255,255,.92)"/>';
+        s += '<image href="'+MULE_URI+'" x="'+(mlCX-mlSize/2)+'" y="'+(mlCY-mlSize/2)+'" width="'+mlSize+'" height="'+mlSize+'"/>';
+      }
+
+      // ── NEW / ENHANCED dots — leftmost bottom ──
+      var dotR = nI===1?8:6.5;
+      var dotX = LX+dotR, dotY = curY + boxH - (nI===1?18:14);
+      if(layer.isNew){
+        s += '<circle cx="'+dotX+'" cy="'+dotY+'" r="'+dotR+'" fill="#22C55E"/>';
+        s += '<text x="'+dotX+'" y="'+(dotY+3.5)+'" text-anchor="middle" font-size="'+(nI===1?9:7.5)+'" font-weight="900" fill="#fff">N</text>';
+        if(nI===1){ s += '<text x="'+(dotX+14)+'" y="'+(dotY+4)+'" font-size="9" font-weight="600" fill="#22C55E">New API</text>'; }
+        dotX += dotR*2+(nI===1?14:4);
+      }
+      if(layer.isEnh){
+        s += '<circle cx="'+dotX+'" cy="'+dotY+'" r="'+dotR+'" fill="#94A3B8"/>';
+        s += '<text x="'+dotX+'" y="'+(dotY+3.5)+'" text-anchor="middle" font-size="'+(nI===1?9:7.5)+'" font-weight="900" fill="#fff">E</text>';
+        if(nI===1){ s += '<text x="'+(dotX+14)+'" y="'+(dotY+4)+'" font-size="9" font-weight="600" fill="#94A3B8">Enhanced</text>'; }
+      }
+
+      // ── RIGHT SIDE: BIZ GROUP (single-item only) + DEPLOY + METHODS ──
+      var RX=bx+bw-10;
+      if(nI===1){
+        s += '<text x="'+RX+'" y="'+(curY+18)+'" text-anchor="end" font-size="9.5" font-weight="700" fill="'+txt2+'">'+esc(bizGrp)+'</text>';
+      }
+      var dpW=Math.max(layer.deploy.length*(nI===1?6.5:5.6)+18, nI===1?68:56), dpX=RX-dpW;
+      s += deployBadge(dpX, curY+(nI===1?24:8), layer.deploy);
+
+      // Method pills — bottom, right-aligned, side by side
+      var ops=layer.ops||[];
+      if(ops.length>0){
+        var pillH2=nI===1?22:18, pillGap=nI===1?5:3;
+        var pillWidths=ops.map(function(op){ return (op.label||'GET').length*(nI===1?6.5:5.4)+(nI===1?18:12); });
+        var totalPillW=pillWidths.reduce(function(a,b){return a+b;},0)+pillGap*(ops.length-1);
+        var pillStartX=RX-totalPillW;
+        var pillY=curY+boxH-pillH2-8;
+        var px=pillStartX;
+        ops.forEach(function(op,oi){
+          var meth=(op.label||'GET').toUpperCase();
+          if(nI===1){ s += methodPill(px, pillY, meth); }
+          else {
+            var mc = METHOD_CLR[meth]||'#94A3B8';
+            var pw = pillWidths[oi];
+            s += '<rect x="'+px+'" y="'+pillY+'" width="'+pw+'" height="'+pillH2+'" rx="5" fill="'+mc+'" opacity=".18"/>';
+            s += '<rect x="'+px+'" y="'+pillY+'" width="'+pw+'" height="'+pillH2+'" rx="5" fill="none" stroke="'+mc+'" stroke-width="1"/>';
+            s += '<text x="'+(px+pw/2)+'" y="'+(pillY+pillH2*0.68)+'" text-anchor="middle" font-size="8" font-weight="800" fill="'+mc+'">'+meth+'</text>';
+          }
+          px += pillWidths[oi]+pillGap;
+        });
+      }
+    });
+
+    curY += boxH;
   });
 
   // ── SAPI ↔ BACKENDS ARROWS — parallel vertical lanes per backend ─────────
