@@ -12618,6 +12618,18 @@ function aledRenderConsumers() {
     colorInput.addEventListener('input', (function(idx){ return function(){ _aledConsumers[idx].color = this.value; genALedDiagram(); }; })(i));
     row.appendChild(colorInput);
 
+    // File-transfer toggle (this consumer exchanges files instead of making API calls)
+    var fileLabel = document.createElement('label');
+    fileLabel.title = 'This consumer sends/receives a file to/from EAPI instead of an API call';
+    fileLabel.style.cssText = 'display:flex;align-items:center;gap:3px;font-size:9px;cursor:pointer;white-space:nowrap;color:var(--txt3);flex-shrink:0';
+    var fileChk = document.createElement('input');
+    fileChk.type = 'checkbox'; fileChk.checked = !!c.viaFile;
+    fileChk.style.cssText = 'width:12px;height:12px;accent-color:#A78BFA';
+    fileChk.addEventListener('change', (function(idx){ return function(){ _aledConsumers[idx].viaFile = this.checked; genALedDiagram(); }; })(i));
+    fileLabel.appendChild(fileChk);
+    fileLabel.appendChild(document.createTextNode('\uD83D\uDCC4 File'));
+    row.appendChild(fileLabel);
+
     // Delete button (consumers are optional — even the last one can be removed)
     var delBtn = document.createElement('button');
     delBtn.textContent = '✕';
@@ -12690,6 +12702,18 @@ function aledRenderBackends() {
     colorInput.addEventListener('input', (function(idx){ return function(){ _aledBackends[idx].color = this.value; genALedDiagram(); }; })(i));
     row.appendChild(colorInput);
 
+    // File-transfer toggle (SAPI drops/receives a file to/from this backend instead of an API call)
+    var fileLabel = document.createElement('label');
+    fileLabel.title = 'SAPI sends/receives a file to/from this backend instead of an API call';
+    fileLabel.style.cssText = 'display:flex;align-items:center;gap:3px;font-size:9px;cursor:pointer;white-space:nowrap;color:var(--txt3);flex-shrink:0';
+    var fileChk = document.createElement('input');
+    fileChk.type = 'checkbox'; fileChk.checked = !!b.viaFile;
+    fileChk.style.cssText = 'width:12px;height:12px;accent-color:#A78BFA';
+    fileChk.addEventListener('change', (function(idx){ return function(){ _aledBackends[idx].viaFile = this.checked; genALedDiagram(); }; })(i));
+    fileLabel.appendChild(fileChk);
+    fileLabel.appendChild(document.createTextNode('\uD83D\uDCC4 File'));
+    row.appendChild(fileLabel);
+
     // Delete button
     if (i > 0) {
       var delBtn = document.createElement('button');
@@ -12705,13 +12729,13 @@ function aledRenderBackends() {
 
 function aledAddConsumer() {
   var idx = _aledConsumers.length;
-  _aledConsumers.push({name:'Consumer '+(idx+1), icon:CONSUMER_ICONS[idx%CONSUMER_ICONS.length], color:CONSUMER_COLORS[idx%CONSUMER_COLORS.length]});
+  _aledConsumers.push({name:'Consumer '+(idx+1), icon:CONSUMER_ICONS[idx%CONSUMER_ICONS.length], color:CONSUMER_COLORS[idx%CONSUMER_COLORS.length], viaFile:false});
   aledRenderConsumers(); genALedDiagram();
 }
 
 function aledAddBackend() {
   var idx = _aledBackends.length;
-  _aledBackends.push({name:'System '+(idx+1), icon:BACKEND_ICONS[idx%BACKEND_ICONS.length], color:BACKEND_COLORS[idx%BACKEND_COLORS.length], type:BACKEND_TYPES[idx%BACKEND_TYPES.length]});
+  _aledBackends.push({name:'System '+(idx+1), icon:BACKEND_ICONS[idx%BACKEND_ICONS.length], color:BACKEND_COLORS[idx%BACKEND_COLORS.length], type:BACKEND_TYPES[idx%BACKEND_TYPES.length], viaFile:false});
   aledRenderBackends(); genALedDiagram();
 }
 
@@ -12990,9 +13014,23 @@ function genALedDiagram(){
 
   consumers.forEach(function(con, ci){
     var midX  = cStartXArr + ci*(cBoxWArr+12) + Math.floor(cBoxWArr/2);
+    var cc    = con.color || '#60A5FA';
+
+    if(con.viaFile){
+      // ── FILE TRANSFER (one-way): consumer → EAPI ──
+      var fy1 = fanTopY + 4, fy2 = fanBotY - 10;
+      s += '<line x1="'+midX+'" y1="'+fy1+'" x2="'+midX+'" y2="'+fy2+'" stroke="'+cc+'" stroke-width="2.5" stroke-dasharray="6,4"/>';
+      s += '<polygon points="'+(midX-6)+','+fy2+' '+(midX+6)+','+fy2+' '+midX+','+fanBotY+'" fill="'+cc+'"/>';
+      if(numCArr === 1 || ci === Math.floor(numCArr/2)){
+        s += '<text x="'+(midX-11)+'" y="'+(fanTopY+fanArrH/2+3)+'" text-anchor="end" font-size="13">\uD83D\uDCC4</text>';
+        s += '<text x="'+(midX+11)+'" y="'+(fanTopY+fanArrH/2+4)+'" text-anchor="start" font-size="9" font-weight="800" fill="'+cc+'">FILE</text>';
+      }
+      return;
+    }
+
+    // ── API call (default): parallel REQ↓ / RES↑ lanes ──
     var reqX  = midX - 8;   // REQ lane: slightly left of centre
     var resX  = midX + 8;   // RES lane: slightly right of centre
-    var cc    = con.color || '#60A5FA';
 
     // REQ ↓  (consumer → EAPI)
     var reqY1 = fanTopY + 2, reqY2 = fanBotY - 10;
@@ -13159,9 +13197,23 @@ function genALedDiagram(){
 
   backends.forEach(function(bk, bi){
     var midX = bStartXArr + bi*(bBoxWArr+12) + Math.floor(bBoxWArr/2);
+    var bc   = bk.color || '#F97316';
+
+    if(bk.viaFile){
+      // ── FILE TRANSFER (one-way): SAPI → backend ──
+      var fy1 = bFanTopY + 4, fy2 = bFanBotY - 10;
+      s += '<line x1="'+midX+'" y1="'+fy1+'" x2="'+midX+'" y2="'+fy2+'" stroke="'+bc+'" stroke-width="2.5" stroke-dasharray="6,4"/>';
+      s += '<polygon points="'+(midX-6)+','+fy2+' '+(midX+6)+','+fy2+' '+midX+','+bFanBotY+'" fill="'+bc+'"/>';
+      if(numBArr === 1 || bi === Math.floor(numBArr/2)){
+        s += '<text x="'+(midX-11)+'" y="'+(bFanTopY+ARR_H/2+3)+'" text-anchor="end" font-size="13">\uD83D\uDCC4</text>';
+        s += '<text x="'+(midX+11)+'" y="'+(bFanTopY+ARR_H/2+4)+'" text-anchor="start" font-size="9" font-weight="800" fill="'+bc+'">FILE</text>';
+      }
+      return;
+    }
+
+    // ── API call (default): parallel REQ↓ / RES↑ lanes ──
     var reqX = midX - 8;
     var resX = midX + 8;
-    var bc   = bk.color || '#F97316';
 
     // REQ ↓  (SAPI → backend)
     var reqY1 = bFanTopY + 2, reqY2 = bFanBotY - 10;
@@ -13225,10 +13277,15 @@ function genALedDiagram(){
       {clr:'#F97316', lbl:'Backend REQ \u2193', dir:'down'},
       {clr:'#F97316', lbl:'Backend RES \u2191', dir:'up'},
     ];
+    var usesFileTransfer = consumers.some(function(c){ return c.viaFile; }) || backends.some(function(b){ return b.viaFile; });
+    if(usesFileTransfer){ legRow1.push({clr:'#A78BFA', lbl:'\uD83D\uDCC4 File transfer (one-way)', dir:'file'}); }
     legRow1.forEach(function(li){
       if(lx > W-100) return;
       var ax=lx+6;
-      if(li.dir==='down'){
+      if(li.dir==='file'){
+        s += '<line x1="'+ax+'" y1="'+(ly1-12)+'" x2="'+ax+'" y2="'+(ly1+2)+'" stroke="'+li.clr+'" stroke-width="2" stroke-dasharray="4,3"/>';
+        s += '<polygon points="'+(ax-4)+','+(ly1-2)+' '+(ax+4)+','+(ly1-2)+' '+ax+','+(ly1+6)+'" fill="'+li.clr+'"/>';
+      } else if(li.dir==='down'){
         s += '<line x1="'+ax+'" y1="'+(ly1-12)+'" x2="'+ax+'" y2="'+(ly1+2)+'" stroke="'+li.clr+'" stroke-width="2"/>';
         s += '<polygon points="'+(ax-4)+','+(ly1-2)+' '+(ax+4)+','+(ly1-2)+' '+ax+','+(ly1+6)+'" fill="'+li.clr+'"/>';
       } else {
