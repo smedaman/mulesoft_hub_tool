@@ -1735,9 +1735,10 @@ body.light #cheat-fn-desc   { color: #1E293B; }
 
         <!-- BACKENDS -->
         <div class="cfg-section-hdr" style="margin-top:4px;display:flex;align-items:center;justify-content:space-between">
-          <span>Backend Systems</span>
+          <span>Backend Systems <span style="font-weight:400;color:var(--txt3);text-transform:none;letter-spacing:0">(optional)</span></span>
           <button onclick="aledAddBackend()" style="font-size:9px;padding:2px 7px;border-radius:5px;cursor:pointer;background:rgba(251,146,60,.15);color:#FB923C;border:1px solid rgba(251,146,60,.35);font-weight:700">+ Add</button>
         </div>
+        <div style="font-size:9px;color:var(--txt3);margin:-2px 0 5px">Remove all backends to hide this layer from the diagram.</div>
         <div id="aled-backends-list" style="display:flex;flex-direction:column;gap:5px;margin-bottom:6px"></div>
         
 
@@ -12644,6 +12645,12 @@ function aledRenderConsumers() {
 function aledRenderBackends() {
   var list = document.getElementById('aled-backends-list'); if (!list) return;
   list.innerHTML = '';
+  if (_aledBackends.length === 0) {
+    var empty = document.createElement('div');
+    empty.style.cssText = 'font-size:9.5px;color:var(--txt3);font-style:italic;padding:4px 2px';
+    empty.textContent = 'No backend systems — this layer will be hidden from the diagram.';
+    list.appendChild(empty);
+  }
   _aledBackends.forEach(function(b, i) {
     var row = document.createElement('div');
     row.style.cssText = 'display:flex;align-items:center;gap:5px;background:rgba(251,146,60,.07);border:1px solid rgba(251,146,60,.2);border-radius:7px;padding:5px 7px';
@@ -12714,14 +12721,12 @@ function aledRenderBackends() {
     fileLabel.appendChild(document.createTextNode('\uD83D\uDCC4 File'));
     row.appendChild(fileLabel);
 
-    // Delete button
-    if (i > 0) {
-      var delBtn = document.createElement('button');
-      delBtn.textContent = '✕';
-      delBtn.style.cssText = 'font-size:11px;padding:0 5px;border-radius:4px;cursor:pointer;background:rgba(239,68,68,.1);color:#FCA5A5;border:1px solid rgba(239,68,68,.2)';
-      delBtn.addEventListener('click', (function(idx){ return function(){ _aledBackends.splice(idx,1); aledRenderBackends(); genALedDiagram(); }; })(i));
-      row.appendChild(delBtn);
-    }
+    // Delete button (backends are optional — even the last one can be removed)
+    var delBtn = document.createElement('button');
+    delBtn.textContent = '✕';
+    delBtn.style.cssText = 'font-size:11px;padding:0 5px;border-radius:4px;cursor:pointer;background:rgba(239,68,68,.1);color:#FCA5A5;border:1px solid rgba(239,68,68,.2)';
+    delBtn.addEventListener('click', (function(idx){ return function(){ _aledBackends.splice(idx,1); aledRenderBackends(); genALedDiagram(); }; })(i));
+    row.appendChild(delBtn);
 
     list.appendChild(row);
   });
@@ -12877,11 +12882,13 @@ function genALedDiagram(){
   var CX     = W/2;
   var GAP_H  = 28;   // extra room for section labels
   var hasConsumers = (typeof _aledConsumers !== 'undefined') && _aledConsumers.length > 0;
+  var hasBackends = (typeof _aledBackends !== 'undefined') && _aledBackends.length > 0;
   var BOX_H_MULTI = 128; // taller card row when a layer has multiple APIs, so there's room for badges + logo without crowding
   var layerBoxHeights = layers.map(function(lg){ return lg.items.length>1 ? BOX_H_MULTI : BOX_H; });
   var sumLayerBoxH = layerBoxHeights.reduce(function(a,b){return a+b;},0);
   var H = TOP_H + GAP_H + CLI_H + layers.length*ARR_H + sumLayerBoxH + ARR_H + BCK_H + LEG_H + 80;
   if(!hasConsumers) H -= (CLI_H + ARR_H); // consumers layer is optional
+  if(!hasBackends) H -= (ARR_H + BCK_H + 40); // backends layer is optional
 
   // ── Colors ───────────────────────────────────────────────
   var bg     = darkBg ? '#0D1117' : '#F0F6FF';
@@ -12970,7 +12977,7 @@ function genALedDiagram(){
   // Consumers are OPTIONAL: if the user removes all of them, this whole layer
   // (row + fan arrows) is skipped and the diagram starts directly at EAPI.
   var consumers = (typeof _aledConsumers !== 'undefined') ? _aledConsumers : [];
-  var backends  = (typeof _aledBackends  !== 'undefined' && _aledBackends.length)  ? _aledBackends  : [{name:'Backend System', icon:'\uD83D\uDCC4', color:'#64748B', type:'System'}];
+  var backends  = (typeof _aledBackends  !== 'undefined') ? _aledBackends : [];
 
   if(hasConsumers){
   // ── CONSUMERS ROW (multiple) ──────────────────────────────
@@ -13186,6 +13193,7 @@ function genALedDiagram(){
     curY += boxH;
   });
 
+  if(hasBackends){
   // ── SAPI ↔ BACKENDS ARROWS — parallel vertical lanes per backend ─────────
   // Each backend gets its own vertical REQ↓/RES↑ pair, aligned to its centre X.
   var bFanTopY  = curY;
@@ -13262,6 +13270,7 @@ function genALedDiagram(){
     s += '<text x="'+(bnameX+typeW/2)+'" y="'+(curY+BCK_H/2+16)+'" text-anchor="middle" font-size="8" font-weight="800" fill="'+bc+'">'+esc(bk.type||'DB')+'</text>';
   });
   curY += BCK_H + 40;
+  } // end hasBackends guard
 
   // ── LEGEND────────────────────────────
   if(showLeg){
