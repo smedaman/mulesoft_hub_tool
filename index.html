@@ -12575,51 +12575,54 @@ function aledRenderConsumers() {
   }
   _aledConsumers.forEach(function(c, i) {
     var row = document.createElement('div');
-    row.style.cssText = 'display:flex;align-items:center;gap:5px;background:rgba(96,165,250,.07);border:1px solid rgba(96,165,250,.2);border-radius:7px;padding:5px 7px';
+    row.style.cssText = 'display:flex;flex-direction:column;gap:5px;background:rgba(96,165,250,.07);border:1px solid rgba(96,165,250,.2);border-radius:7px;padding:6px 7px';
 
-    // Icon/logo
+    // ── Row 1: icon + name ──
+    var row1 = document.createElement('div');
+    row1.style.cssText = 'display:flex;align-items:center;gap:6px';
+
     var iconEl = document.createElement(c.logo ? 'img' : 'span');
-    if (c.logo) { iconEl.src = c.logo; iconEl.style.cssText = 'width:28px;height:28px;border-radius:4px;object-fit:contain;background:#fff;cursor:pointer'; iconEl.title = 'Click to cycle icon'; }
-    else { iconEl.style.cssText = 'font-size:14px;cursor:pointer'; iconEl.textContent = c.icon; iconEl.title = 'Click to cycle icon'; }
+    if (c.logo) { iconEl.src = c.logo; iconEl.style.cssText = 'width:28px;height:28px;border-radius:4px;object-fit:contain;background:#fff;cursor:pointer;flex-shrink:0'; iconEl.title = 'Click to cycle icon'; }
+    else { iconEl.style.cssText = 'font-size:14px;cursor:pointer;flex-shrink:0'; iconEl.textContent = c.icon; iconEl.title = 'Click to cycle icon'; }
     iconEl.addEventListener('click', (function(idx){ return function(){ aledCycleIcon(0,idx); }; })(i));
-    row.appendChild(iconEl);
+    row1.appendChild(iconEl);
 
-    // Name input
     var nameInput = document.createElement('input');
     nameInput.value = c.name;
-    nameInput.style.cssText = 'flex:1;font-size:10px;border-radius:5px;padding:3px 6px;background:var(--input-bg);color:var(--input-txt);border:1px solid rgba(96,165,250,.3)';
+    nameInput.style.cssText = 'flex:1;min-width:0;font-size:10px;border-radius:5px;padding:3px 6px;background:var(--input-bg);color:var(--input-txt);border:1px solid rgba(96,165,250,.3)';
     nameInput.addEventListener('input', (function(idx){ return function(){ _aledConsumers[idx].name = this.value; genALedDiagram(); }; })(i));
-    row.appendChild(nameInput);
+    row1.appendChild(nameInput);
+    row.appendChild(row1);
 
-    // Logo upload label
+    // ── Row 2: logo upload/clear + color + file toggle + delete (delete always pinned to the far right) ──
+    var row2 = document.createElement('div');
+    row2.style.cssText = 'display:flex;align-items:center;gap:5px;flex-wrap:wrap';
+
     var uploadLabel = document.createElement('label');
     uploadLabel.title = 'Upload logo';
-    uploadLabel.style.cssText = 'cursor:pointer;font-size:9px;padding:2px 5px;border-radius:4px;background:rgba(96,165,250,.12);color:#60A5FA;border:1px dashed rgba(96,165,250,.4);white-space:nowrap';
+    uploadLabel.style.cssText = 'cursor:pointer;font-size:9px;padding:2px 5px;border-radius:4px;background:rgba(96,165,250,.12);color:#60A5FA;border:1px dashed rgba(96,165,250,.4);white-space:nowrap;flex-shrink:0';
     uploadLabel.textContent = '📷';
-    var fileInput = document.createElement('input');
-    fileInput.type = 'file'; fileInput.accept = 'image/*'; fileInput.style.display = 'none';
-    fileInput.addEventListener('change', (function(idx){ return function(){ aledReadItemLogo(this,0,idx); }; })(i));
-    uploadLabel.appendChild(fileInput);
-    row.appendChild(uploadLabel);
+    var fileInputEl = document.createElement('input');
+    fileInputEl.type = 'file'; fileInputEl.accept = 'image/*'; fileInputEl.style.display = 'none';
+    fileInputEl.addEventListener('change', (function(idx){ return function(){ aledReadItemLogo(this,0,idx); }; })(i));
+    uploadLabel.appendChild(fileInputEl);
+    row2.appendChild(uploadLabel);
 
-    // Clear logo button (only if logo exists)
     if (c.logo) {
       var clrBtn = document.createElement('button');
       clrBtn.textContent = '✕'; clrBtn.title = 'Clear logo';
-      clrBtn.style.cssText = 'font-size:9px;padding:2px 4px;border-radius:4px;cursor:pointer;background:rgba(239,68,68,.08);color:#FCA5A5;border:1px solid rgba(239,68,68,.2)';
+      clrBtn.style.cssText = 'font-size:9px;padding:2px 4px;border-radius:4px;cursor:pointer;background:rgba(239,68,68,.08);color:#FCA5A5;border:1px solid rgba(239,68,68,.2);flex-shrink:0';
       clrBtn.addEventListener('click', (function(idx){ return function(){ _aledConsumers[idx].logo=null; aledRenderConsumers(); genALedDiagram(); }; })(i));
-      row.appendChild(clrBtn);
+      row2.appendChild(clrBtn);
     }
 
-    // Color picker
     var colorInput = document.createElement('input');
     colorInput.type = 'color'; colorInput.value = c.color;
     colorInput.title = 'Color';
-    colorInput.style.cssText = 'width:22px;height:22px;border:none;border-radius:4px;cursor:pointer;background:none;padding:0';
+    colorInput.style.cssText = 'width:22px;height:22px;border:none;border-radius:4px;cursor:pointer;background:none;padding:0;flex-shrink:0';
     colorInput.addEventListener('input', (function(idx){ return function(){ _aledConsumers[idx].color = this.value; genALedDiagram(); }; })(i));
-    row.appendChild(colorInput);
+    row2.appendChild(colorInput);
 
-    // File-transfer toggle (this consumer exchanges files instead of making API calls)
     var fileLabel = document.createElement('label');
     fileLabel.title = 'This consumer sends/receives a file to/from EAPI instead of an API call';
     fileLabel.style.cssText = 'display:flex;align-items:center;gap:3px;font-size:9px;cursor:pointer;white-space:nowrap;color:var(--txt3);flex-shrink:0';
@@ -12629,15 +12632,16 @@ function aledRenderConsumers() {
     fileChk.addEventListener('change', (function(idx){ return function(){ _aledConsumers[idx].viaFile = this.checked; genALedDiagram(); }; })(i));
     fileLabel.appendChild(fileChk);
     fileLabel.appendChild(document.createTextNode('\uD83D\uDCC4 File'));
-    row.appendChild(fileLabel);
+    row2.appendChild(fileLabel);
 
-    // Delete button (consumers are optional — even the last one can be removed)
+    // Delete button (consumers are optional — even the last one can be removed). Pinned right.
     var delBtn = document.createElement('button');
-    delBtn.textContent = '✕';
-    delBtn.style.cssText = 'font-size:11px;padding:0 5px;border-radius:4px;cursor:pointer;background:rgba(239,68,68,.1);color:#FCA5A5;border:1px solid rgba(239,68,68,.2)';
+    delBtn.textContent = '✕ Delete';
+    delBtn.style.cssText = 'margin-left:auto;font-size:10px;padding:2px 8px;border-radius:4px;cursor:pointer;background:rgba(239,68,68,.1);color:#FCA5A5;border:1px solid rgba(239,68,68,.2);flex-shrink:0;white-space:nowrap';
     delBtn.addEventListener('click', (function(idx){ return function(){ _aledConsumers.splice(idx,1); aledRenderConsumers(); genALedDiagram(); }; })(i));
-    row.appendChild(delBtn);
+    row2.appendChild(delBtn);
 
+    row.appendChild(row2);
     list.appendChild(row);
   });
 }
@@ -12653,25 +12657,26 @@ function aledRenderBackends() {
   }
   _aledBackends.forEach(function(b, i) {
     var row = document.createElement('div');
-    row.style.cssText = 'display:flex;align-items:center;gap:5px;background:rgba(251,146,60,.07);border:1px solid rgba(251,146,60,.2);border-radius:7px;padding:5px 7px';
+    row.style.cssText = 'display:flex;flex-direction:column;gap:5px;background:rgba(251,146,60,.07);border:1px solid rgba(251,146,60,.2);border-radius:7px;padding:6px 7px';
 
-    // Icon/logo
+    // ── Row 1: icon + name + type ──
+    var row1 = document.createElement('div');
+    row1.style.cssText = 'display:flex;align-items:center;gap:6px';
+
     var iconEl = document.createElement(b.logo ? 'img' : 'span');
-    if (b.logo) { iconEl.src = b.logo; iconEl.style.cssText = 'width:28px;height:28px;border-radius:4px;object-fit:contain;background:#fff;cursor:pointer'; iconEl.title = 'Click to cycle icon'; }
-    else { iconEl.style.cssText = 'font-size:14px;cursor:pointer'; iconEl.textContent = b.icon; iconEl.title = 'Click to cycle icon'; }
+    if (b.logo) { iconEl.src = b.logo; iconEl.style.cssText = 'width:28px;height:28px;border-radius:4px;object-fit:contain;background:#fff;cursor:pointer;flex-shrink:0'; iconEl.title = 'Click to cycle icon'; }
+    else { iconEl.style.cssText = 'font-size:14px;cursor:pointer;flex-shrink:0'; iconEl.textContent = b.icon; iconEl.title = 'Click to cycle icon'; }
     iconEl.addEventListener('click', (function(idx){ return function(){ aledCycleIcon(1,idx); }; })(i));
-    row.appendChild(iconEl);
+    row1.appendChild(iconEl);
 
-    // Name input
     var nameInput = document.createElement('input');
     nameInput.value = b.name;
-    nameInput.style.cssText = 'flex:1;font-size:10px;border-radius:5px;padding:3px 6px;background:var(--input-bg);color:var(--input-txt);border:1px solid rgba(251,146,60,.3)';
+    nameInput.style.cssText = 'flex:1;min-width:0;font-size:10px;border-radius:5px;padding:3px 6px;background:var(--input-bg);color:var(--input-txt);border:1px solid rgba(251,146,60,.3)';
     nameInput.addEventListener('input', (function(idx){ return function(){ _aledBackends[idx].name = this.value; genALedDiagram(); }; })(i));
-    row.appendChild(nameInput);
+    row1.appendChild(nameInput);
 
-    // Type select
     var typeSelect = document.createElement('select');
-    typeSelect.style.cssText = 'font-size:9px;border-radius:5px;padding:2px 4px;background:var(--input-bg);color:var(--input-txt);border:1px solid rgba(251,146,60,.3)';
+    typeSelect.style.cssText = 'flex-shrink:0;font-size:9px;border-radius:5px;padding:2px 4px;background:var(--input-bg);color:var(--input-txt);border:1px solid rgba(251,146,60,.3)';
     BACKEND_TYPES.forEach(function(t) {
       var opt = document.createElement('option');
       opt.value = t; opt.textContent = t;
@@ -12679,37 +12684,38 @@ function aledRenderBackends() {
       typeSelect.appendChild(opt);
     });
     typeSelect.addEventListener('change', (function(idx){ return function(){ _aledBackends[idx].type = this.value; genALedDiagram(); }; })(i));
-    row.appendChild(typeSelect);
+    row1.appendChild(typeSelect);
+    row.appendChild(row1);
 
-    // Logo upload label
+    // ── Row 2: logo upload/clear + color + file toggle + delete (delete always pinned to the far right) ──
+    var row2 = document.createElement('div');
+    row2.style.cssText = 'display:flex;align-items:center;gap:5px;flex-wrap:wrap';
+
     var uploadLabel = document.createElement('label');
     uploadLabel.title = 'Upload logo';
-    uploadLabel.style.cssText = 'cursor:pointer;font-size:9px;padding:2px 5px;border-radius:4px;background:rgba(251,146,60,.12);color:#FB923C;border:1px dashed rgba(251,146,60,.4);white-space:nowrap';
+    uploadLabel.style.cssText = 'cursor:pointer;font-size:9px;padding:2px 5px;border-radius:4px;background:rgba(251,146,60,.12);color:#FB923C;border:1px dashed rgba(251,146,60,.4);white-space:nowrap;flex-shrink:0';
     uploadLabel.textContent = '📷';
-    var fileInput = document.createElement('input');
-    fileInput.type = 'file'; fileInput.accept = 'image/*'; fileInput.style.display = 'none';
-    fileInput.addEventListener('change', (function(idx){ return function(){ aledReadItemLogo(this,1,idx); }; })(i));
-    uploadLabel.appendChild(fileInput);
-    row.appendChild(uploadLabel);
+    var fileInputEl = document.createElement('input');
+    fileInputEl.type = 'file'; fileInputEl.accept = 'image/*'; fileInputEl.style.display = 'none';
+    fileInputEl.addEventListener('change', (function(idx){ return function(){ aledReadItemLogo(this,1,idx); }; })(i));
+    uploadLabel.appendChild(fileInputEl);
+    row2.appendChild(uploadLabel);
 
-    // Clear logo button
     if (b.logo) {
       var clrBtn = document.createElement('button');
       clrBtn.textContent = '✕'; clrBtn.title = 'Clear logo';
-      clrBtn.style.cssText = 'font-size:9px;padding:2px 4px;border-radius:4px;cursor:pointer;background:rgba(239,68,68,.08);color:#FCA5A5;border:1px solid rgba(239,68,68,.2)';
+      clrBtn.style.cssText = 'font-size:9px;padding:2px 4px;border-radius:4px;cursor:pointer;background:rgba(239,68,68,.08);color:#FCA5A5;border:1px solid rgba(239,68,68,.2);flex-shrink:0';
       clrBtn.addEventListener('click', (function(idx){ return function(){ _aledBackends[idx].logo=null; aledRenderBackends(); genALedDiagram(); }; })(i));
-      row.appendChild(clrBtn);
+      row2.appendChild(clrBtn);
     }
 
-    // Color picker
     var colorInput = document.createElement('input');
     colorInput.type = 'color'; colorInput.value = b.color;
     colorInput.title = 'Color';
-    colorInput.style.cssText = 'width:22px;height:22px;border:none;border-radius:4px;cursor:pointer;background:none;padding:0';
+    colorInput.style.cssText = 'width:22px;height:22px;border:none;border-radius:4px;cursor:pointer;background:none;padding:0;flex-shrink:0';
     colorInput.addEventListener('input', (function(idx){ return function(){ _aledBackends[idx].color = this.value; genALedDiagram(); }; })(i));
-    row.appendChild(colorInput);
+    row2.appendChild(colorInput);
 
-    // File-transfer toggle (SAPI drops/receives a file to/from this backend instead of an API call)
     var fileLabel = document.createElement('label');
     fileLabel.title = 'SAPI sends/receives a file to/from this backend instead of an API call';
     fileLabel.style.cssText = 'display:flex;align-items:center;gap:3px;font-size:9px;cursor:pointer;white-space:nowrap;color:var(--txt3);flex-shrink:0';
@@ -12719,15 +12725,16 @@ function aledRenderBackends() {
     fileChk.addEventListener('change', (function(idx){ return function(){ _aledBackends[idx].viaFile = this.checked; genALedDiagram(); }; })(i));
     fileLabel.appendChild(fileChk);
     fileLabel.appendChild(document.createTextNode('\uD83D\uDCC4 File'));
-    row.appendChild(fileLabel);
+    row2.appendChild(fileLabel);
 
-    // Delete button (backends are optional — even the last one can be removed)
+    // Delete button (backends are optional — even the last one can be removed). Pinned right.
     var delBtn = document.createElement('button');
-    delBtn.textContent = '✕';
-    delBtn.style.cssText = 'font-size:11px;padding:0 5px;border-radius:4px;cursor:pointer;background:rgba(239,68,68,.1);color:#FCA5A5;border:1px solid rgba(239,68,68,.2)';
+    delBtn.textContent = '✕ Delete';
+    delBtn.style.cssText = 'margin-left:auto;font-size:10px;padding:2px 8px;border-radius:4px;cursor:pointer;background:rgba(239,68,68,.1);color:#FCA5A5;border:1px solid rgba(239,68,68,.2);flex-shrink:0;white-space:nowrap';
     delBtn.addEventListener('click', (function(idx){ return function(){ _aledBackends.splice(idx,1); aledRenderBackends(); genALedDiagram(); }; })(i));
-    row.appendChild(delBtn);
+    row2.appendChild(delBtn);
 
+    row.appendChild(row2);
     list.appendChild(row);
   });
 }
