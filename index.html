@@ -12358,7 +12358,7 @@ window.aledClearLogo = aledClearLogo;
 var METH_LIST = ['GET','POST','PUT','DELETE','PATCH','HEAD','OPTIONS'];
 var METH_CLR  = {GET:'#34D399',POST:'#60A5FA',PUT:'#FBBF24',DELETE:'#F87171',PATCH:'#C084FC',HEAD:'#94A3B8',OPTIONS:'#94A3B8'};
 var ALED_AUTH_OPTS  = ['Entra Id','OAuth 2.0','Client ID Enforcement','JWT','API Key','Basic Auth','mTLS','None'];
-var ALED_PROTO_OPTS = ['HTTPS','HTTP','WSS','gRPC'];
+var ALED_PROTO_OPTS = ['HTTPS','HTTP','WSS','gRPC','Scheduler'];
 var ALED_DEPLOY_OPTS= [['CH 2.0','CloudHub 2.0'],['CH 1.0','CloudHub 1.0'],['RTF','Runtime Fabric'],['On-Prem','On-Premises'],['Hybrid','Hybrid']];
 var ALED_LAYER_META = {
   eapi:{clr:'#38BDF8', label:'Experience API', prefix:'my-experience-api', defAuth:'Entra Id', defPort:'443', defDeploy:'CH 2.0', opsLabel:'HTTP Methods — Client → EAPI'},
@@ -12473,10 +12473,17 @@ function aledRenderLayerItems(type){
     var protoSel = document.createElement('select');
     protoSel.style.cssText = 'font-size:9px;border-radius:5px;padding:3px 4px;background:var(--input-bg);color:var(--input-txt);border:1px solid '+meta.clr+'55';
     ALED_PROTO_OPTS.forEach(function(p){ var o=document.createElement('option'); o.value=p; o.textContent=p; if(p===item.proto) o.selected=true; protoSel.appendChild(o); });
-    protoSel.addEventListener('change', function(){ item.proto = this.value; genALedDiagram(); });
     var portInput = document.createElement('input');
     portInput.type='text'; portInput.value=item.port; portInput.placeholder='Port';
-    portInput.style.cssText = 'font-size:9px;border-radius:5px;padding:3px 4px;background:var(--input-bg);color:var(--input-txt);border:1px solid '+meta.clr+'55;text-align:center';
+    portInput.title = 'Port number';
+    var setPortDisabledState = function(){
+      var isScheduler = (item.proto === 'Scheduler');
+      portInput.disabled = isScheduler;
+      portInput.title = isScheduler ? 'N/A — Scheduler has no port' : 'Port number';
+      portInput.style.cssText = 'font-size:9px;border-radius:5px;padding:3px 4px;background:'+(isScheduler?'rgba(148,163,184,.15)':'var(--input-bg)')+';color:'+(isScheduler?'var(--txt3)':'var(--input-txt)')+';border:1px solid '+meta.clr+'55;text-align:center;cursor:'+(isScheduler?'not-allowed':'text')+';opacity:'+(isScheduler?'.55':'1');
+    };
+    setPortDisabledState();
+    protoSel.addEventListener('change', function(){ item.proto = this.value; setPortDisabledState(); genALedDiagram(); });
     portInput.addEventListener('input', function(){ item.port = this.value; genALedDiagram(); });
     row1.appendChild(authSel); row1.appendChild(protoSel); row1.appendChild(portInput);
     card.appendChild(row1);
@@ -13130,7 +13137,7 @@ function genALedDiagram(){
 
       // ── PROTO:PORT BADGE ──
       if(showPort){
-        var protoLabel = layer.proto+':'+layer.port;
+        var protoLabel = (layer.proto === 'Scheduler') ? '\u23F1 Scheduler' : (layer.proto+':'+layer.port);
         var protoW = Math.max(protoLabel.length*(nI===1?6:5.3)+14, nI===1?62:50);
         var protoX = LX+authW+6;
         if(protoX+protoW <= bx+bw-6){
